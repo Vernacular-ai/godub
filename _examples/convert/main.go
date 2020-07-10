@@ -9,7 +9,7 @@ import (
 
 	"strings"
 
-	"github.com/Vernacular-ai/converter"
+	"github.com/Vernacular-ai/godub/converter"
 )
 
 var (
