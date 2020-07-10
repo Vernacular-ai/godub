@@ -5,7 +5,7 @@ import (
 
 	"bytes"
 
-	"github.com/iFaceless/godub"
+	"github.com/Vernacular-ai/godub"
 )
 
 type SignalGenerator interface {
