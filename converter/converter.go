@@ -11,7 +11,7 @@ import (
 
 	"path"
 
-	"github.com/Vernacular-ai/godub/utils"
+	"godub/utils"
 	"github.com/tink-ab/tempfile"
 )
 

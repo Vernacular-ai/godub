@@ -9,7 +9,7 @@ import (
 
 	"strings"
 
-	"github.com/Vernacular-ai/godub/converter"
+	"godub/converter"
 )
 
 var (
@@ -97,7 +97,7 @@ func doWork(task *Task) {
 
 	// 配置下导出参数
 	err := converter.NewConverter(w).
-		WithBitRate(fmt.Sprintf("%dk", task.bitRate)).
+		WithBitRate(task.bitRate).
 		WithDstFormat(task.dstFormat).
 		WithChannels(task.numChannel).
 		WithSampleRate(task.sampleRate).

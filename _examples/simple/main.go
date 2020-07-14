@@ -9,9 +9,9 @@ import (
 
 	"time"
 
-	"github.com/Vernacular-ai/godub/converter"
+	"godub"
+	"godub/converter"
 	"github.com/caicloud/nirvana/log"
-	"github.com/iFaceless/godub"
 )
 
 func main() {
