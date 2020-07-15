@@ -139,8 +139,44 @@ func (seg *AudioSegment) Slice(start, end time.Duration) (*AudioSegment, error) 
 		end = audioLength
 	}
 
-	startIndex := seg.parsePosition(start) * int(seg.frameWidth)
-	endIndex := seg.parsePosition(end) * int(seg.frameWidth)
+	startIndex := seg.parsePosition(start*time.Millisecond) * int(seg.frameWidth)
+	endIndex := seg.parsePosition(end*time.Millisecond) * int(seg.frameWidth)
+
+	expectedLength := endIndex - startIndex
+
+	if endIndex > len(seg.data) {
+		endIndex = len(seg.data)
+	}
+
+	data := seg.data[startIndex:endIndex]
+
+	// Ensure the output is as long as the user is expecting
+	missingFrames := (expectedLength - len(data)) / int(seg.frameWidth)
+	if missingFrames > 0 {
+		if float64(missingFrames) > seg.FrameCountIn(2*time.Millisecond) {
+			return nil, NewAudioSegmentError(
+				"you should never be filling in more than 2ms with silence here, missing %d frames",
+				missingFrames)
+		}
+
+		if silence, err := audioop.Mul(data[:seg.frameWidth], int(seg.sampleWidth), 0); err != nil {
+			silences := bytes.Repeat(silence, missingFrames)
+			data = utils.ConcatenateByteSlice(data, silences)
+		}
+	}
+
+	return seg.derive(data)
+}
+
+func (seg *AudioSegment) SliceIndex(startIndex, endIndex int) (*AudioSegment, error) {
+	if startIndex > endIndex {
+		return nil, NewAudioSegmentError("start should be smaller than end")
+	}
+
+	if startIndex < 0 || endIndex < 0 {
+		return nil, NewAudioSegmentError("start or end should be positive")
+	}
+
 	expectedLength := endIndex - startIndex
 
 	if endIndex > len(seg.data) {
@@ -436,10 +472,11 @@ func (seg *AudioSegment) RMS() float64 {
 			return 0
 		}
 		rms := float64(r)
+
 		seg.rms = &rms
 		return rms
 	}
-	return 0
+
 }
 
 // DBFS returns the value of dB Full Scale
@@ -472,6 +509,7 @@ func (seg *AudioSegment) Duration() time.Duration {
 	}
 
 	mills := math.Round(1000.0 * (seg.FrameCount() / float64(seg.frameRate)))
+
 	return time.Duration(int(mills) * int(time.Millisecond))
 }
 
@@ -511,6 +549,10 @@ func (seg *AudioSegment) Channels() uint16 {
 
 func (seg *AudioSegment) RawData() []byte {
 	return seg.data
+}
+
+func (seg *AudioSegment) Len() int {
+	return len(seg.data)
 }
 
 // Private functions & methods

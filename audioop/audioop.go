@@ -1,6 +1,8 @@
 package audioop
 
-import "math"
+import (
+	"math"
+)
 
 func GetSample(cp []byte, size int, offset int) (int32, error) {
 	err := checkParameters(len(cp), size)
@@ -84,6 +86,7 @@ func RMS(cp []byte, size int) (int32, error) {
 	}
 
 	sampleCount := sampleCount(cp, size)
+
 	if sampleCount == 0 {
 		return 0, nil
 	}
