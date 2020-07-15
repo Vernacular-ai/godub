@@ -129,7 +129,6 @@ func detectNonsilent(seg *AudioSegment, minSilenceLen int, silenceThresh Volume,
 	prevEndI := 0
 	endI := 0
 	for i := range silentRanges {
-
 		nonsilentRanges = append(nonsilentRanges, []int{prevEndI, silentRanges[i][0]})
 		prevEndI = silentRanges[i][1]
 
@@ -147,7 +146,8 @@ func detectNonsilent(seg *AudioSegment, minSilenceLen int, silenceThresh Volume,
 	return nonsilentRanges
 }
 
-func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keep_silence int, seekStep int) []*AudioSegment {
+// SplitOnSilence ...
+func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keepSilence int, seekStep int) []*AudioSegment {
 	chunks := []*AudioSegment{}
 	normAudio, _ := seg.derive(seg.RawData())
 	normAudio = matchTargetAmp(seg, -20.0)
@@ -163,8 +163,8 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 	}
 	for i := 0; i < len(notSilenceRanges)-1; i++ {
 		endMax := notSilenceRanges[i][1] + (notSilenceRanges[i+1][0]-notSilenceRanges[i][1]+1)/2
-		startI := max(int(startMin), int(notSilenceRanges[i][0]-keep_silence))
-		endI := min(int(endMax), int(notSilenceRanges[i][1]+keep_silence))
+		startI := max(int(startMin), int(notSilenceRanges[i][0]-keepSilence))
+		endI := min(int(endMax), int(notSilenceRanges[i][1]+keepSilence))
 
 		temp1, _ := seg.Slice(time.Duration(startI), time.Duration(endI))
 		if temp1 != nil {
@@ -174,7 +174,7 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 		startMin = notSilenceRanges[i][1]
 	}
 
-	temp2, _ := seg.Slice(time.Duration(max(startMin, notSilenceRanges[len(notSilenceRanges)-1][0]-keep_silence)), time.Duration(min(utils.Milliseconds(seg.Duration()), notSilenceRanges[len(notSilenceRanges)-1][1]+keep_silence)))
+	temp2, _ := seg.Slice(time.Duration(max(startMin, notSilenceRanges[len(notSilenceRanges)-1][0]-keepSilence)), time.Duration(min(utils.Milliseconds(seg.Duration()), notSilenceRanges[len(notSilenceRanges)-1][1]+keepSilence)))
 	if temp2 != nil {
 		chunks = append(chunks, temp2)
 

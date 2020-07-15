@@ -18,6 +18,7 @@ type Loader struct {
 	buf       io.Writer
 }
 
+// NewLoader create a new loader
 func NewLoader() *Loader {
 	var buf bytes.Buffer
 	return &Loader{
@@ -31,7 +32,8 @@ func (l *Loader) WithParams(params ...string) *Loader {
 	return l
 }
 
-func (l *Loader) Load(src interface{}) (*AudioSegment, error) {
+// Load ...
+func (la *Loader) Load(src interface{}) (*AudioSegment, error) {
 	var buf []byte
 
 	switch r := src.(type) {
@@ -47,8 +49,10 @@ func (l *Loader) Load(src interface{}) (*AudioSegment, error) {
 			return nil, err
 		}
 		buf = result
+	case []byte:
+		buf = r
 	default:
-		return nil, fmt.Errorf("expected `io.Reader` or file path to original audio")
+		return nil, fmt.Errorf("expected `io.Reader`, `[]byte` or file path to original audio")
 	}
 
 	// Try to decode it as wave audio
