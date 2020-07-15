@@ -3,7 +3,7 @@ package godub
 import (
 	"time"
 
-	"godub/utils"
+	"github.com/Vernacular-ai/godub/utils"
 
 	"github.com/google/go-cmp/cmp"
 )

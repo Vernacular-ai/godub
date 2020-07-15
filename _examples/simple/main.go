@@ -9,8 +9,9 @@ import (
 
 	"time"
 
-	"godub"
-	"godub/converter"
+	"github.com/Vernacular-ai/godub"
+
+	"github.com/Vernacular-ai/godub/converter"
 
 	"github.com/caicloud/nirvana/log"
 )

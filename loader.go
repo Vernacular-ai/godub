@@ -9,8 +9,8 @@ import (
 
 	"io/ioutil"
 
-	"godub/converter"
-	"godub/wav"
+	"github.com/Vernacular-ai/godub/converter"
+	"github.com/Vernacular-ai/godub/wav"
 )
 
 type Loader struct {

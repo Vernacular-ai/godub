@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"godub/audioop"
+	"github.com/Vernacular-ai/godub/audioop"
 )
 
 func main() {

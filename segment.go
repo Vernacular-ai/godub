@@ -10,9 +10,9 @@ import (
 
 	"time"
 
-	"godub/audioop"
-	"godub/utils"
-	"godub/wav"
+	"github.com/Vernacular-ai/godub/audioop"
+	"github.com/Vernacular-ai/godub/utils"
+	"github.com/Vernacular-ai/godub/wav"
 )
 
 var (

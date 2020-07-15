@@ -6,8 +6,8 @@ import (
 
 	"bytes"
 
-	"godub/converter"
-	"godub/wav"
+	"github.com/Vernacular-ai/godub/converter"
+	"github.com/Vernacular-ai/godub/wav"
 )
 
 type Exporter struct {

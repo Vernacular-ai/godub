@@ -8,8 +8,9 @@ import (
 	"path"
 	"runtime"
 
-	"godub"
-	"godub/signals"
+	"github.com/Vernacular-ai/godub"
+
+	"github.com/Vernacular-ai/godub/signals"
 )
 
 func main() {
