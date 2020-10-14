@@ -131,6 +131,43 @@ func main() {
 }
 ```
 
+## Split on Silence
+```go
+func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keepSilence int, seekStep int) ([]*AudioSegment, [][]float32)
+```
+
+Args:
+seg - a AudioSegment object
+minSilenceLen - the minimum silence lenght in milliseconds on which to segment the audios
+silenceThresh - the threshold in dB below which everything is considered silence
+keepSilence - the silence in milliseconds to keep at both ends of a segment
+seekStep - the step in milliseconds
+
+Returns:
+chunks - an array of AudioSegments
+timings - an array with the start and end times in seconds 
+
+Takes a AudioSegment as input and return two arrays with chunks and their timing info
+The timing returned is in reference to the original segment and is measured in seconds. So if you combine the chunks, the timing will reflect the segment in the original audio, not the lenght of the new chunk you've created.
+
+
+
+```go
+func main(){
+	segment, _ := godub.NewLoader().Load(path.Join(dataDirectory(), "code-geass.mp3"))
+	//threshold := godub.NewVolumeFromRatio(segment.DBFS().ToRatio(false)*0.15, 0, false) // Setting threshold as a ratio
+	threshold := godub.Volume(-23) //Setting a threshold manually
+
+	chunks, timings := godub.SplitOnSilence(segment, 1000, threshold, 1000, 1)
+	for i := range segs {
+		toFilePath := path.Join(tFP, "seg-"+strconv.Itoa(i))
+		godub.NewExporter(toFilePath).WithDstFormat("wav").WithBitRate(8000).Export(chunks[i])
+
+	}
+}
+
+```
+
 # Dependency
 
 [godub](https://github.com/iFaceless/godub)  uses [ffmpeg](https://ffmpeg.org/ffmpeg.html) as its backend to support encoding, decoding and conversion.

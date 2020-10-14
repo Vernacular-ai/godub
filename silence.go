@@ -147,8 +147,9 @@ func detectNonsilent(seg *AudioSegment, minSilenceLen int, silenceThresh Volume,
 }
 
 // SplitOnSilence ...
-func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keepSilence int, seekStep int) []*AudioSegment {
+func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keepSilence int, seekStep int) ([]*AudioSegment, [][]float32) {
 	chunks := []*AudioSegment{}
+	var timings [][]float32
 	normAudio, _ := seg.derive(seg.RawData())
 	normAudio = matchTargetAmp(seg, -20.0)
 
@@ -158,7 +159,8 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 
 	if len(notSilenceRanges) == 1 {
 		chunks = append(chunks, seg)
-		return chunks
+		timings = append(timings, []float32{0.0, float32(seg.Len())})
+		return chunks, timings
 
 	}
 	for i := 0; i < len(notSilenceRanges)-1; i++ {
@@ -169,17 +171,22 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 		temp1, _ := seg.Slice(time.Duration(startI), time.Duration(endI))
 		if temp1 != nil {
 			chunks = append(chunks, temp1)
+			timings = append(timings, []float32{float32(startI) / 1000, float32(endI) / 1000.0})
+
 		}
 
 		startMin = notSilenceRanges[i][1]
 	}
 
-	temp2, _ := seg.Slice(time.Duration(max(startMin, notSilenceRanges[len(notSilenceRanges)-1][0]-keepSilence)), time.Duration(min(utils.Milliseconds(seg.Duration()), notSilenceRanges[len(notSilenceRanges)-1][1]+keepSilence)))
+	startI := max(startMin, notSilenceRanges[len(notSilenceRanges)-1][0]-keepSilence)
+	endI := min(utils.Milliseconds(seg.Duration()), notSilenceRanges[len(notSilenceRanges)-1][1]+keepSilence)
+	temp2, _ := seg.Slice(time.Duration(startI), time.Duration(endI))
 	if temp2 != nil {
 		chunks = append(chunks, temp2)
+		timings = append(timings, []float32{float32(startI) / 1000, float32(endI) / 1000.0})
 
 	}
-	return chunks
+	return chunks, timings
 }
 
 func detectLeadingSilence(sound *AudioSegment, silenceThreshold Volume, chunkSize int) int {
