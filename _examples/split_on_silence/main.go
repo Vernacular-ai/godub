@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"path"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	filePath := path.Join("code-geass.mp3")
+	filePath := path.Join("code-geass.wav")
 	dat, _ := ioutil.ReadFile(filePath)
 
 	// get AudioSegment from buffer
@@ -26,7 +27,11 @@ func main() {
 
 	// Use the below comment to set a static threshold
 	// threshold := godub.Volume(-23)
-	chunks, timings := godub.SplitOnSilence(segment, 1000, threshold, 1000, 1)
+	chunks, timings, err := godub.SplitOnSilence(segment, 1000, threshold, 1000, 1)
+
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
 	// fmt.Printf("%v", timings)
 	start := 0
 	end := len(chunks)

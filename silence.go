@@ -1,12 +1,32 @@
 package godub
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Vernacular-ai/godub/utils"
 
 	"github.com/google/go-cmp/cmp"
 )
+
+// InvalidFile error type
+type InvalidFile struct {
+	OriginalError string
+}
+
+func (invalidFile *InvalidFile) Error() string {
+	return fmt.Sprintf("InvalidFile Error: %v", invalidFile.OriginalError)
+}
+
+// Check if audio is empty
+func checkEmptyAudio(seg *AudioSegment) error {
+
+	rms := seg.RMS()
+	if rms == 0 {
+		return &InvalidFile{"Empty file. Check audio"}
+	}
+	return nil
+}
 
 func min(a, b int) int {
 	if a < b {
@@ -147,10 +167,19 @@ func detectNonsilent(seg *AudioSegment, minSilenceLen int, silenceThresh Volume,
 }
 
 // SplitOnSilence ...
-func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keepSilence int, seekStep int) ([]*AudioSegment, [][]float32) {
+func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, keepSilence int, seekStep int) ([]*AudioSegment, [][]float32, error) {
+
 	chunks := []*AudioSegment{}
 	var timings [][]float32
+
+	err := checkEmptyAudio(seg)
+
+	if err != nil {
+		return chunks, timings, err
+	}
+
 	normAudio, _ := seg.derive(seg.RawData())
+
 	normAudio = matchTargetAmp(seg, -20.0)
 
 	notSilenceRanges := detectNonsilent(normAudio, minSilenceLen, silenceThresh, seekStep)
@@ -160,7 +189,7 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 	if len(notSilenceRanges) == 1 {
 		chunks = append(chunks, seg)
 		timings = append(timings, []float32{0.0, float32(seg.Len())})
-		return chunks, timings
+		return chunks, timings, nil
 
 	}
 	for i := 0; i < len(notSilenceRanges)-1; i++ {
@@ -186,7 +215,7 @@ func SplitOnSilence(seg *AudioSegment, minSilenceLen int, silenceThresh Volume, 
 		timings = append(timings, []float32{float32(startI) / 1000, float32(endI) / 1000.0})
 
 	}
-	return chunks, timings
+	return chunks, timings, nil
 }
 
 func detectLeadingSilence(sound *AudioSegment, silenceThreshold Volume, chunkSize int) int {
